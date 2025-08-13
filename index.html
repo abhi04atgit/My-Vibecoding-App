@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyManager - Financial Calculators</title>
+    <style>
+        /* --- Google Font --- */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        /* --- General Styles & Variables --- */
+        :root {
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --primary-accent: #0f3460;
+            --secondary-accent: #e94560;
+            --text-light: #e0e0e0;
+            --text-dark: #1a1a2e;
+            --border-color: #537895;
+            --result-bg: #0f3460;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        /* --- Header --- */
+        header h1 {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px var(--secondary-accent);
+        }
+
+        /* --- Navigation Tabs --- */
+        nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .nav-btn {
+            background-color: var(--primary-accent);
+            color: var(--text-light);
+            border: 2px solid transparent;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--secondary-accent);
+            border-color: var(--text-light);
+        }
+
+        .nav-btn.active {
+            background-color: var(--secondary-accent);
+            color: var(--text-light);
+            box-shadow: 0 0 15px rgba(233, 69, 96, 0.5);
+        }
+
+        /* --- Main Content & Calculator Cards --- */
+        main {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .calculator {
+            display: none;
+            background-color: var(--bg-card);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+        }
+
+        .calculator.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .calculator h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--secondary-accent);
+        }
+
+        /* --- Form Elements --- */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--primary-accent);
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(224, 224, 224, 0.6);
+        }
+
+        .calc-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--secondary-accent);
+            color: var(--text-light);
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .calc-btn:hover {
+            background-color: #ff6b81; /* Lighter shade of secondary accent */
+        }
+
+        .explore-btn {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            width: 100%;
+            padding: 12px;
+            background-color: transparent;
+            color: var(--secondary-accent);
+            border: 2px solid var(--secondary-accent);
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .explore-btn:hover {
+            background-color: var(--secondary-accent);
+            color: var(--text-light);
+        }
+
+        /* --- Result Display --- */
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: var(--result-bg);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.1rem;
+            display: none; /* Initially hidden */
+        }
+        
+        .result p {
+            margin-bottom: 10px;
+        }
+
+        .result span {
+            font-weight: 600;
+            color: var(--secondary-accent);
+            font-size: 1.3rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>MoneyManager</h1>
+    </header>
+
+    <nav>
+        <button id="si-btn" class="nav-btn active">Simple Interest</button>
+        <button id="ci-btn" class="nav-btn">Compound Interest</button>
+        <button id="sip-btn" class="nav-btn">SIP Calculator</button>
+        <button id="swp-btn" class="nav-btn">SWP Calculator</button>
+        <button id="emi-btn" class="nav-btn">EMI Calculator</button>
+    </nav>
+
+    <main>
+        <!-- Simple Interest Calculator -->
+        <div id="si-calc" class="calculator active">
+            <h2>Simple Interest Calculator</h2>
+            <div class="form-group">
+                <label for="si-principal">Principal Amount (₹)</label>
+                <input type="number" id="si-principal" placeholder="e.g., 50000">
+            </div>
+            <div class="form-group">
+                <label for="si-rate">Annual Interest Rate (%)</label>
+                <input type="number" id="si-rate" placeholder="e.g., 7.5">
+            </div>
+            <div class="form-group">
+                <label for="si-time">Time Period (Years)</label>
+                <input type="number" id="si-time" placeholder="e.g., 5">
+            </div>
+            <button class="calc-btn" id="si-calculate-btn">Calculate</button>
+            <a href="https://www.etmoney.com/fixed-deposit" target="_blank" class="explore-btn">Explore Top FDs</a>
+            <div class="result" id="si-result"></div>
+        </div>
+
+        <!-- Compound Interest Calculator -->
+        <div id="ci-calc" class="calculator">
+            <h2>Compound Interest Calculator</h2>
+            <div class="form-group">
+                <label for="ci-principal">Principal Amount (₹)</label>
+                <input type="number" id="ci-principal" placeholder="e.g., 50000">
+            </div>
+            <div class="form-group">
+                <label for="ci-rate">Annual Interest Rate (%)</label>
+                <input type="number" id="ci-rate" placeholder="e.g., 8">
+            </div>
+            <div class="form-group">
+                <label for="ci-time">Time Period (Years)</label>
+                <input type="number" id="ci-time" placeholder="e.g., 10">
+            </div>
+            <button class="calc-btn" id="ci-calculate-btn">Calculate</button>
+            <a href="https://www.etmoney.com/fixed-deposit" target="_blank" class="explore-btn">Explore Top FDs</a>
+            <div class="result" id="ci-result"></div>
+        </div>
+
+        <!-- SIP Calculator -->
+        <div id="sip-calc" class="calculator">
+            <h2>SIP Calculator (with Step-up)</h2>
+            <div class="form-group">
+                <label for="sip-investment">Monthly Investment (₹)</label>
+                <input type="number" id="sip-investment" placeholder="e.g., 5000">
+            </div>
+            <div class="form-group">
+                <label for="sip-rate">Expected Annual Return Rate (%)</label>
+                <input type="number" id="sip-rate" placeholder="e.g., 12">
+            </div>
+            <div class="form-group">
+                <label for="sip-time">Investment Period (Years)</label>
+                <input type="number" id="sip-time" placeholder="e.g., 15">
+            </div>
+            <div class="form-group">
+                <label for="sip-stepup">Annual Step-up (%) (Optional)</label>
+                <input type="number" id="sip-stepup" placeholder="e.g., 10 (or 0 for none)">
+            </div>
+            <button class="calc-btn" id="sip-calculate-btn">Calculate</button>
+            <a href="https://www.etmoney.com/mutual-funds/featured/best-mutual-funds/29" target="_blank" class="explore-btn">Explore Best Mutual Funds</a>
+            <div class="result" id="sip-result"></div>
+        </div>
+
+        <!-- SWP Calculator -->
+        <div id="swp-calc" class="calculator">
+            <h2>SWP Calculator</h2>
+            <div class="form-group">
+                <label for="swp-investment">Total Investment (₹)</label>
+                <input type="number" id="swp-investment" placeholder="e.g., 1000000">
+            </div>
+            <div class="form-group">
+                <label for="swp-withdrawal">Monthly Withdrawal (₹)</label>
+                <input type="number" id="swp-withdrawal" placeholder="e.g., 8000">
+            </div>
+            <div class="form-group">
+                <label for="swp-rate">Expected Annual Return Rate (%)</label>
+                <input type="number" id="swp-rate" placeholder="e.g., 7">
+            </div>
+            <button class="calc-btn" id="swp-calculate-btn">Calculate</button>
+            <a href="https://www.etmoney.com/mutual-funds/featured/best-mutual-funds/29" target="_blank" class="explore-btn">Explore Best Mutual Funds</a>
+            <div class="result" id="swp-result"></div>
+        </div>
+
+        <!-- EMI Calculator -->
+        <div id="emi-calc" class="calculator">
+            <h2>EMI Calculator</h2>
+            <div class="form-group">
+                <label for="emi-amount">Loan Amount (₹)</label>
+                <input type="number" id="emi-amount" placeholder="e.g., 2500000">
+            </div>
+            <div class="form-group">
+                <label for="emi-rate">Annual Interest Rate (%)</label>
+                <input type="number" id="emi-rate" placeholder="e.g., 8.5">
+            </div>
+            <div class="form-group">
+                <label for="emi-tenure">Loan Tenure (Years)</label>
+                <input type="number" id="emi-tenure" placeholder="e.g., 20">
+            </div>
+            <button class="calc-btn" id="emi-calculate-btn">Calculate</button>
+            <a href="https://cleartax.in/s/lowest-personal-loan-interest-rate" target="_blank" class="explore-btn">Get Loan with Lowest Interest Rate</a>
+            <div class="result" id="emi-result"></div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const calculators = document.querySelectorAll('.calculator');
+
+            // --- Navigation Logic ---
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Deactivate all buttons and calculators
+                    navButtons.forEach(btn => btn.classList.remove('active'));
+                    calculators.forEach(calc => calc.classList.remove('active'));
+
+                    // Activate the clicked button and corresponding calculator
+                    button.classList.add('active');
+                    const targetId = button.id.replace('-btn', '-calc');
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+
+            // --- Helper function to format currency ---
+            const formatCurrency = (num) => `₹ ${num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            // --- Simple Interest Calculation ---
+            document.getElementById('si-calculate-btn').addEventListener('click', () => {
+                const p = parseFloat(document.getElementById('si-principal').value);
+                const r = parseFloat(document.getElementById('si-rate').value);
+                const t = parseFloat(document.getElementById('si-time').value);
+                const resultDiv = document.getElementById('si-result');
+
+                if (p > 0 && r > 0 && t > 0) {
+                    const interest = (p * r * t) / 100;
+                    const totalAmount = p + interest;
+                    resultDiv.innerHTML = `
+                        <p>Interest Earned: <span>${formatCurrency(interest)}</span></p>
+                        <p>Total Amount: <span>${formatCurrency(totalAmount)}</span></p>
+                    `;
+                    resultDiv.style.display = 'block';
+                } else {
+                    resultDiv.innerHTML = `<p>Please enter valid positive numbers for all fields.</p>`;
+                    resultDiv.style.display = 'block';
+                }
+            });
+
+            // --- Compound Interest Calculation ---
+            document.getElementById('ci-calculate-btn').addEventListener('click', () => {
+                const p = parseFloat(document.getElementById('ci-principal').value);
+                const r = parseFloat(document.getElementById('ci-rate').value);
+                const t = parseFloat(document.getElementById('ci-time').value);
+                const resultDiv = document.getElementById('ci-result');
+
+                if (p > 0 && r > 0 && t > 0) {
+                    // A = P(1 + r/n)^(nt), assuming n=1 (compounded annually)
+                    const totalAmount = p * Math.pow((1 + r / 100), t);
+                    const interest = totalAmount - p;
+                    resultDiv.innerHTML = `
+                        <p>Interest Earned: <span>${formatCurrency(interest)}</span></p>
+                        <p>Total Amount: <span>${formatCurrency(totalAmount)}</span></p>
+                    `;
+                    resultDiv.style.display = 'block';
+                } else {
+                    resultDiv.innerHTML = `<p>Please enter valid positive numbers for all fields.</p>`;
+                    resultDiv.style.display = 'block';
+                }
+            });
+
+            // --- SIP Calculation ---
+            document.getElementById('sip-calculate-btn').addEventListener('click', () => {
+                const p = parseFloat(document.getElementById('sip-investment').value);
+                const r = parseFloat(document.getElementById('sip-rate').value);
+                const t = parseFloat(document.getElementById('sip-time').value);
+                const s = parseFloat(document.getElementById('sip-stepup').value) || 0;
+                const resultDiv = document.getElementById('sip-result');
+
+                if (p > 0 && r > 0 && t > 0 && s >= 0) {
+                    const i = r / 12 / 100; // monthly rate
+                    let totalValue = 0;
+                    let totalInvested = 0;
+                    let monthlyInvestment = p;
+
+                    for (let year = 0; year < t; year++) {
+                        for (let month = 0; month < 12; month++) {
+                            totalInvested += monthlyInvestment;
+                            // Calculate future value of this single investment
+                            const monthsRemaining = (t * 12) - (year * 12 + month + 1);
+                            totalValue += monthlyInvestment * Math.pow(1 + i, monthsRemaining);
+                        }
+                        // Apply annual step-up
+                        monthlyInvestment *= (1 + s / 100);
+                    }
+
+                    const wealthGained = totalValue - totalInvested;
+                    resultDiv.innerHTML = `
+                        <p>Total Invested: <span>${formatCurrency(totalInvested)}</span></p>
+                        <p>Wealth Gained: <span>${formatCurrency(wealthGained)}</span></p>
+                        <p>Expected Amount: <span>${formatCurrency(totalValue)}</span></p>
+                    `;
+                    resultDiv.style.display = 'block';
+                } else {
+                    resultDiv.innerHTML = `<p>Please enter valid positive numbers for all fields.</p>`;
+                    resultDiv.style.display = 'block';
+                }
+            });
+
+            // --- SWP Calculation ---
+            document.getElementById('swp-calculate-btn').addEventListener('click', () => {
+                const p = parseFloat(document.getElementById('swp-investment').value);
+                const w = parseFloat(document.getElementById('swp-withdrawal').value);
+                const r = parseFloat(document.getElementById('swp-rate').value);
+                const resultDiv = document.getElementById('swp-result');
+
+                if (p > 0 && w > 0 && r > 0) {
+                    const monthlyRate = r / 12 / 100;
+                    if (w <= p * monthlyRate) {
+                         resultDiv.innerHTML = `<p>Your withdrawal amount is less than or equal to your monthly interest. Your money will last <span>forever</span>.</p>`;
+                         resultDiv.style.display = 'block';
+                         return;
+                    }
+                    // n = log(W / (W - P*r)) / log(1+r)
+                    const n = Math.log(w / (w - p * monthlyRate)) / Math.log(1 + monthlyRate);
+                    const years = Math.floor(n / 12);
+                    const months = Math.round(n % 12);
+
+                    resultDiv.innerHTML = `<p>Your investment will last for approximately <span>${years} years and ${months} months</span>.</p>`;
+                    resultDiv.style.display = 'block';
+                } else {
+                    resultDiv.innerHTML = `<p>Please enter valid positive numbers for all fields.</p>`;
+                    resultDiv.style.display = 'block';
+                }
+            });
+
+            // --- EMI Calculation ---
+            document.getElementById('emi-calculate-btn').addEventListener('click', () => {
+                const p = parseFloat(document.getElementById('emi-amount').value);
+                const r = parseFloat(document.getElementById('emi-rate').value);
+                const t = parseFloat(document.getElementById('emi-tenure').value);
+                const resultDiv = document.getElementById('emi-result');
+
+                if (p > 0 && r > 0 && t > 0) {
+                    const monthlyRate = r / 12 / 100;
+                    const n = t * 12; // tenure in months
+                    // EMI = P * r * (1+r)^n / ((1+r)^n - 1)
+                    const emi = (p * monthlyRate * Math.pow(1 + monthlyRate, n)) / (Math.pow(1 + monthlyRate, n) - 1);
+                    const totalPayable = emi * n;
+                    const totalInterest = totalPayable - p;
+
+                    resultDiv.innerHTML = `
+                        <p>Monthly EMI: <span>${formatCurrency(emi)}</span></p>
+                        <p>Total Interest Payable: <span>${formatCurrency(totalInterest)}</span></p>
+                        <p>Total Payment (Principal + Interest): <span>${formatCurrency(totalPayable)}</span></p>
+                    `;
+                    resultDiv.style.display = 'block';
+                } else {
+                    resultDiv.innerHTML = `<p>Please enter valid positive numbers for all fields.</p>`;
+                    resultDiv.style.display = 'block';
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
