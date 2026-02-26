@@ -47,6 +47,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: install_gitleaks
-        runs: sudo apt intall gitleaks -y
+        run: sudo apt intall gitleaks -y
       - name: gitleak_scan
-        runs: gitleaks detect source .
+        run: gitleaks detect source .
