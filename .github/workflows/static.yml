@@ -41,3 +41,12 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+  leackcheck:
+    runs_on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: install_gitleaks
+        runs: sudo apt intall gitleaks -y
+      - name: gitleak_scan
+        runs: gitleaks detect source .
